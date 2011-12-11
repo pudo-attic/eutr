@@ -1,7 +1,7 @@
 from flask import render_template, request, abort, url_for
 
 from eutr.core import app, db
-from eutr.model import Organisation
+from eutr.model import Entity
 from eutr.pager import Pager
 
 def _pager():
@@ -15,15 +15,15 @@ def index():
 def search():
     return render_template('search.tmpl', pager=_pager())
 
-@app.route('/org/<int:id>')
-def organisation(id):
-    organisation = db.session.query(Organisation).filter_by(id=id).first()
-    if organisation is None:
+@app.route('/entity/<int:id>')
+def entity(id):
+    entity = db.session.query(Entity).filter_by(id=id).first()
+    if entity is None:
         abort(404)
     from pprint import pformat
-    raw = pformat(organisation.as_dict())
-    return render_template('organisation.tmpl', 
-            organisation=organisation, raw=raw)
+    raw = pformat(entity.as_dict())
+    return render_template('entity.tmpl', 
+            entity=entity, raw=raw)
 
 if __name__ == "__main__":
     app.run(port=5009)

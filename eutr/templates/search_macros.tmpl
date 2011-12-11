@@ -1,8 +1,12 @@
 {% macro search(pager) %}
   <form id="search-form" method="GET" action="{{ url_for('search') }}">
     <input id="search-box" class="xlinput span8" name="q" value="{{ pager.q }}" placeholder="search term" autofocus >
+    <br>
+    <br>
     {% for t, v in pager.filters %}
-      <input type="hidden" name="filter_{{ t }}" value="{{ v }}" />
+      <input type="hidden" name="filter-{{ t }}" value="{{ v }}" />
+      <a href="{{ pager.unfilter_url(t, v) }}"><span class="label important">{{
+v }}</span></a>
     {% endfor %}
   </form>
 {% endmacro %}

@@ -47,25 +47,29 @@ class Pager(object):
 
     @property
     def params(self):
-        return [(k, v.encode('utf-8')) for k, v in self.args.items() \
-                if k != 'p']
+        _params = []
+        for k in self.args:
+            if k == 'p': continue
+            _params.extend([(k, v.encode('utf-8')) for v in
+                self.args.getlist(k)])
+        return _params
 
     def page_url(self, page):
-        return url_for('search', p=page, **dict(self.params))
+        return url_for('search') + '?p=%s'%page  + '&' + urlencode(self.params)
 
     @property
     def filters(self):
         filters = []
         for k, v in self.params:
             if k.startswith(FILTER_PREFIX):
-                filters.append((k, v))
+                filters.append((k[len(FILTER_PREFIX):], v))
         return filters
 
     @property
     def fq(self):
         _fq = []
         for k, v in self.filters:
-            _fq.append('%s:"%s"' % (k[len(FILTER_PREFIX):], v))
+            _fq.append('%s:"%s"' % (k, v))
         return _fq
 
     def filter_url(self, key, value):
@@ -111,7 +115,7 @@ class Pager(object):
             fq=self.fq,
             facet='true',
             facet_field=[f + '.s' for f in self.facets],
-            facet_limit=50,
+            facet_limit=20,
             rows=self.limit,
             start=self.offset)
         return json.loads(data)

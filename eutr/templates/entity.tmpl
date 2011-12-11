@@ -1,0 +1,138 @@
+{% extends "layout.tmpl" %}
+
+{% block title %}
+  {{ entity['name'] }}
+{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <div class="span-one-third">
+      &nbsp;
+    </div>
+    <div class="span-two-thirds">
+      <h2>{{ entity.name }}
+        {% if entity.legalStatus %}
+          <small>{{ entity.legalStatus }}</small>
+        {% endif %}
+      </h2>
+    </div>
+    <div class="span-one-third">
+      <dl>
+        {% if entity.acronym %}
+          <dt>Acronym</dt>
+          <dd>{{ entity.acronym }}</dd>
+        {% endif %}
+        {% if entity.subCategory %}
+          <dt>Category</dt>
+          <dd>{{ entity.subCategory }}</dd>
+        {% endif %}
+        {% if entity.headPersonLastName %}
+          <dt>Head Representative</dt>
+          <dd>{{ entity.headPersonTitle }}
+              {{ entity.headPersonFirstName }}
+              {{ entity.headPersonLastName }}
+              <span class="help-block">{{ entity.headPersonPosition }}</span>
+          </dd>
+        {% endif %}
+        {% if entity.legalPersonLastName and (entity.legalPersonLastName !=
+entity.headPersonLastName or entity.legalPersonFirstName !=
+entity.headPersonFirstName) %}
+          <dt>Legal Representative</dt>
+          <dd>{{ entity.legalPersonTitle }}
+              {{ entity.legalPersonFirstName }}
+              {{ entity.legalPersonLastName }}
+              <span class="help-block">{{ entity.legalPersonPosition }}</span>
+          </dd>
+        {% endif %}
+        {% if entity.members %}
+          <dt>Members/Representatives</dt>
+          <dd>{{ entity.members | int }}</dd>
+        {% endif %}
+        {% if entity.webSiteURL %}
+          <dt>Web site</dt>
+          <dd><a href="{{ entity.webSiteURL }}">{{ entity.webSiteURL }}</a></dd>
+        {% endif %}
+        {% if entity.contactPhone %}
+          <dt>Phone</dt>
+          <dd><span class="help-inline">(+{{entity.contactIndicPhone}})</span> 
+              {{ entity.contactPhone }}</dd>
+        {% endif %}
+        {% if entity.contactCountry or entity.contactMore %}
+          <dt>Address</dt>
+          <dd><address>
+            {{ entity.contactStreet }} {{ entity.contactNumber }}<br/>
+            {{ entity.contactPostCode }} {{ entity.contactTown }}<br/>
+            {{ entity.contactCountry.name }}
+            {% if entity.contactMore %}
+              <span class="help-block">{{ entity.contactMore }}</span>
+            {% endif %}
+            </address>
+          </dd>
+        {% endif %}
+        {% if entity.interests %}
+          <dt>Interests</dt>
+          <dd><ul class="unstyled">
+            {% for interest in entity.interests %}
+              <li><a
+href="{{url_for('search')}}?filter-interests={{interest.name}}">{{ interest.name }}</a></li>
+            {% endfor %}
+          </ul></dd>
+        {% endif %}
+      </dl>
+    </div>
+    <div class="span-two-thirds">
+      {% if entity.type == 'organisation' %}
+        {% if entity.turnoversFor.count() %}
+          <h3>Paid Representation</h3>
+          <ul>
+            {% for turn in entity.turnoversFor %}
+              <li><a href="{{ url_for('entity', id=turn.representative.id) }}">{{
+turn.representative.name }}</a>: EUR {{ turn.min | int }} - {{ turn.max | int }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        {% if entity.representedBy.count() %}
+          <h3>Group Memberships</h3>
+          <ul>
+            {% for rep in entity.representedBy %}
+              <li>
+                <a href="{{ url_for('entity', id=rep.id) }}">{{ rep.name }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endif %}
+
+      {% if entity.type == 'representative' %}
+        {% if entity.activities %}
+          <p>{{ entity.activities }}</p>
+        {% endif %}
+        
+        {% if entity.goals %}
+          <h3>Goals</h3>
+          <p>{{ entity.goals }}</p>
+        {% endif %}
+        {% if entity.networking %}
+          <h3>Networking</h3>
+          <p>{{ entity.networking }}</p>
+        {% endif %}
+        {% if entity.memberships %}
+          <h3>Members
+            <small>Organisations represented by {{entity.name}}</small>
+          </h3>
+          <ul>
+            {% for org in entity.memberships %}
+              <li><a href="{{ url_for('entity', id=org.id) }}">{{ org.name }}</a></li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+        <pre>{{ raw }}</pre>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+
+
+
+
+

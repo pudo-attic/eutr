@@ -34,25 +34,28 @@ class AsDictMixin(object):
         return dict([(k, v) for k, v in data.items() if k not in remove])
 
 
-class Organisation(db.Model, HaveMixin, AsDictMixin):
+class Entity(db.Model, HaveMixin, AsDictMixin):
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column('type', db.String(50))
     __mapper_args__ = {'polymorphic_on': type}
-    __mapper_args__ = {'polymorphic_identity': 'organisation'}
 
     name = db.Column(db.Unicode)
     members = db.Column(db.Float)
-    
-    turnoversFor = db.relationship('Turnover',
-        primaryjoin='Turnover.customer_id==Organisation.id',
-        backref='customer', lazy='dynamic')
 
     def as_dict_child(self):
         return {'id': self.id, 'name': self.name}
 
+class Organisation(Entity):
+    __mapper_args__ = {'polymorphic_identity': 'organisation'}
+    
+    turnoversFor = db.relationship('Turnover',
+        primaryjoin='Turnover.customer_id==Organisation.id',
+        backref='customer', lazy='dynamic')
+    
+
 memberships = db.Table('memberships',
-    db.Column('member_id', db.Integer, db.ForeignKey('organisation.id')),
-    db.Column('representative_id', db.Integer, db.ForeignKey('organisation.id'))
+    db.Column('member_id', db.Integer, db.ForeignKey('entity.id')),
+    db.Column('representative_id', db.Integer, db.ForeignKey('entity.id'))
 )
 
 class Country(db.Model, HaveMixin):
@@ -68,7 +71,7 @@ class Country(db.Model, HaveMixin):
 
 countries_of_members = db.Table('countries_of_members',
     db.Column('country_id', db.Integer, db.ForeignKey('country.id')),
-    db.Column('representative_id', db.Integer, db.ForeignKey('organisation.id'))
+    db.Column('representative_id', db.Integer, db.ForeignKey('entity.id'))
 )
 
 class ActionField(db.Model, HaveMixin):
@@ -80,7 +83,7 @@ class ActionField(db.Model, HaveMixin):
 
 fields = db.Table('fields',
     db.Column('action_field_id', db.Integer, db.ForeignKey('action_field.id')),
-    db.Column('representative_id', db.Integer, db.ForeignKey('organisation.id'))
+    db.Column('representative_id', db.Integer, db.ForeignKey('entity.id'))
 )
 
 class Interest(db.Model, HaveMixin):
@@ -91,7 +94,7 @@ class Interest(db.Model, HaveMixin):
         return self.name
 
 interests_table = db.Table('interests',
-    db.Column('representative_id', db.Integer, db.ForeignKey('organisation.id')),
+    db.Column('representative_id', db.Integer, db.ForeignKey('entity.id')),
     db.Column('interest_id', db.Integer, db.ForeignKey('interest.id'))
 )
 
@@ -112,8 +115,8 @@ class FinancialSource(db.Model, AsDictMixin):
 
 class Turnover(db.Model, AsDictMixin):
     id = db.Column(db.Integer, primary_key=True)
-    customer_id = db.Column(db.Integer, db.ForeignKey('organisation.id'))
-    representative_id = db.Column(db.Integer, db.ForeignKey('organisation.id'))
+    customer_id = db.Column(db.Integer, db.ForeignKey('entity.id'))
+    representative_id = db.Column(db.Integer, db.ForeignKey('entity.id'))
     financialData_id = db.Column(db.Integer, db.ForeignKey('financial_data.id'))
     min = db.Column(db.Float, nullable=True)
     max = db.Column(db.Float, nullable=True)
@@ -129,7 +132,7 @@ class Turnover(db.Model, AsDictMixin):
 
 class FinancialData(db.Model, AsDictMixin):
     id = db.Column(db.Integer, primary_key=True)
-    representative_id = db.Column(db.Integer, db.ForeignKey('organisation.id'))
+    representative_id = db.Column(db.Integer, db.ForeignKey('entity.id'))
     type = db.Column(db.Unicode)
     startDate = db.Column(db.Unicode)
     endDate = db.Column(db.Unicode)
@@ -160,7 +163,7 @@ class FinancialData(db.Model, AsDictMixin):
 
 class Representative(Organisation):
     __mapper_args__ = {'polymorphic_identity': 'representative'}
-    #id = db.Column(db.Integer, primary_key=True)
+    
     identificationCode = db.Column(db.Unicode, unique=True)
     status = db.Column(db.Unicode)
     registrationDate = db.Column(db.Unicode)

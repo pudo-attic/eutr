@@ -32,7 +32,7 @@ def flatten(data, sep='.'):
 def index():
     solr_ = solr()
     buf = []
-    for i, org in enumerate(model.db.session.query(model.Organisation)):
+    for i, org in enumerate(model.db.session.query(model.Entity)):
         data = flatten(org.as_dict())
         #pprint(data)
         for k, v in data.items():
