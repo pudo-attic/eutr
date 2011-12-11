@@ -6,7 +6,9 @@ from eutr import default_settings
 
 app = Flask(__name__)
 app.config.from_object(default_settings)
-app.config.from_envvar('EUTR_SETTINGS', silent=True)
+try:
+    app.config.from_object('eutr.production_settings')
+except ImportError: pass
 
 db = SQLAlchemy(app)
 
