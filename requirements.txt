@@ -1,0 +1,5 @@
+epio
+Flask
+Flask-SQLAlchemy
+solrpy
+SQLAlchemy==0.7.4
