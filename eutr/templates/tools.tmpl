@@ -1,0 +1,38 @@
+
+{% macro numrange(min, max, abs) %}
+  <span class="">
+  {% if abs %}
+    {{ abs | int }}
+  {% else %}
+    {% if min and max %}
+      {{ min |int }} - {{ max | int }}
+    {% elif min %}
+      min. {{ min | int }}
+    {% elif max %}
+      max. {{ max | int }}
+    {% else %}
+      &mdash;
+    {% endif %}
+  {% endif %}
+  </span>
+{% endmacro %}
+
+
+{% macro orglist(orgs) %}
+  <table class="condensed-table zebra-striped">
+    {% for org in orgs %}
+      <tr>
+        <td><a href="{{ url_for('entity', id=org.id)}}">
+        {{ org.name }}</a></td>
+        <td><span class="help-inline">
+          {% if org.type == 'representative' %}
+            Representative
+          {% else %}
+            Organisation
+          {% endif %}
+        </span></td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endmacro %}
+

@@ -13,25 +13,13 @@
   </div>
   <div class="row">
     <div class="span-one-third">
-      <ul>
-      {%for name, count in pager.facet_values('interests') %}
-        <li><a href="{{pager.filter_url('interests', name)}}">{{name}}</a> <span class="help-inline">({{count}})</span></li>
-      {%endfor%}
-      </ul>
+      {{ macros.facetlist(pager, 'Interests', 'interests') }}
     </div>
     <div class="span-one-third">
-      <ul>
-      {%for name, count in pager.facet_values('subCategory') %}
-        <li><a href="{{pager.filter_url('subCategory', name)}}">{{name}}</a> <span class="help-inline">({{count}})</span></li>
-      {%endfor%}
-      </ul>
+      {{ macros.facetlist(pager, 'Category', 'subCategory') }}
     </div>
     <div class="span-one-third">
-      <ul>
-      {%for name, count in pager.facet_values('contactCountry') %}
-        <li><a href="{{pager.filter_url('contactCountry', name)}}">{{name}}</a> <span class="help-inline">({{count}})</span></li>
-      {%endfor%}
-      </ul>
+      {{ macros.facetlist(pager, 'Country', 'contactCountry') }}
     </div>
   </div>
 {% endblock %}

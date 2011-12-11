@@ -1,3 +1,4 @@
+{% import "tools.tmpl" as tools %}
 {% extends "layout.tmpl" %}
 
 {% block title %}
@@ -54,8 +55,7 @@ entity.headPersonFirstName) %}
         {% endif %}
         {% if entity.contactPhone %}
           <dt>Phone</dt>
-          <dd><span class="help-inline">(+{{entity.contactIndicPhone}})</span> 
-              {{ entity.contactPhone }}</dd>
+          <dd>(+{{entity.contactIndicPhone}}) {{ entity.contactPhone }}</dd>
         {% endif %}
         {% if entity.contactCountry or entity.contactMore %}
           <dt>Address</dt>
@@ -64,7 +64,7 @@ entity.headPersonFirstName) %}
             {{ entity.contactPostCode }} {{ entity.contactTown }}<br/>
             {{ entity.contactCountry.name }}
             {% if entity.contactMore %}
-              <span class="help-block">{{ entity.contactMore }}</span>
+              <span class="help-block">{{ entity.contactMore | pseudotext }}</span>
             {% endif %}
             </address>
           </dd>
@@ -105,28 +105,139 @@ turn.representative.name }}</a>: EUR {{ turn.min | int }} - {{ turn.max | int }}
 
       {% if entity.type == 'representative' %}
         {% if entity.activities %}
-          <p>{{ entity.activities }}</p>
+          <p>{{ entity.activities | pseudotext }}</p>
         {% endif %}
         
-        {% if entity.goals %}
-          <h3>Goals</h3>
-          <p>{{ entity.goals }}</p>
-        {% endif %}
-        {% if entity.networking %}
-          <h3>Networking</h3>
-          <p>{{ entity.networking }}</p>
-        {% endif %}
         {% if entity.memberships %}
           <h3>Members
             <small>Organisations represented by {{entity.name}}</small>
           </h3>
-          <ul>
-            {% for org in entity.memberships %}
-              <li><a href="{{ url_for('entity', id=org.id) }}">{{ org.name }}</a></li>
-            {% endfor %}
-          </ul>
+          {{ tools.orglist(entity.memberships) }}    
         {% endif %}
-        <pre>{{ raw }}</pre>
+        {% if entity.turnoversBy.count() %}
+          <h3>Clients
+            <small>Represented as a paid customer.</small>
+          </h3>
+          <table class="condensed-table zebra-striped">
+            <tr>
+              <th>Customer</th>
+              <th width="20%">Turnover (EUR)</th>
+            </tr>
+            {% for turnover in entity.turnoversBy %}
+              <tr>
+                <td>
+                  <a href="{{ url_for('entity', id=turnover.customer.id) }}">{{ turnover.customer.name }}</a>
+                </td>
+                <td>
+                  {{ tools.numrange(turnover.min, turnover.max, None) }}
+                </td>
+              </tr>
+            {% endfor %}
+          </table>
+        {% endif %}
+        {% if entity.financialData.count() %}
+          {% for fd in entity.financialData %}
+          <h3>Financial Statement
+            <small>Period of {{ fd.startDate | datefmt }} -
+                   {{ fd.endDate | datefmt }}</small>
+          </h3>
+          <table class="condensed-table zebra-striped">
+            <tr>
+              <th colspan="2">Expenditure</th>
+              <th width="20%">EUR</th>
+            </tr>
+            <tr>
+              <td colspan="2">Cost</td>
+              <td>{{ tools.numrange(fd.costMin, fd.costMax, fd.costAbsolute) }}</td>
+            </tr>
+            <tr>
+              <td colspan="2">Direct Representation Cost</td>
+              <td>{{ tools.numrange(fd.directRepCostsMin, fd.directRepCostsMax) }}</td>
+            </tr>
+            <tr>
+              <th colspan="2">Revenue</th>
+              <th>EUR</th>
+            </tr>
+            <tr>
+              <td colspan="2">Client Turnover</td>
+              <td>{{ tools.numrange(fd.turnoverMin, fd.turnoverMax, fd.turnoverAbsolute) }}</td>
+            </tr>
+            <tr>
+              <td colspan="2">European Sources</td>
+              <td></td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>Grants</td>
+              <td>{{ tools.numrange(None, None, fd.eurSourcesGrants) }}</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>Procurement</td>
+              <td>{{ tools.numrange(None, None, fd.eurSourcesProcurement) }}</td>
+            </tr>
+            <tr>
+              <td colspan="2">Publicly Financed</td>
+              <td>{{ tools.numrange(None, None, fd.publicFinancingTotal) }}</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>National</td>
+              <td>{{ tools.numrange(None, None, fd.publicFinancingNational) }}</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>Infranational</td>
+              <td>{{ tools.numrange(None, None, fd.publicFinancingInfranational) }}</td>
+            </tr>
+            {% for fs in fd.sourcesCustomized %}
+              {% if fs.public %}
+                <tr>
+                  <td></td>
+                  <td>{{fs.name}}</td>
+                  <td>{{ tools.numrange(None, None, fs.amount) }}</td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+            <tr>
+              <td colspan="2">Other Sources</td>
+              <td>{{ tools.numrange(None, None, fd.otherSourcesTotal) }}</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>Donations</td>
+              <td>{{ tools.numrange(None, None, fd.otherSourcesDonation) }}</td>
+            </tr>
+            <tr>
+              <td></td>
+              <td>Contributions</td>
+              <td>{{ tools.numrange(None, None, fd.otherSourcesContributions) }}</td>
+            </tr>
+            {% for fs in fd.sourcesCustomized %}
+              {% if not fs.public %}
+                <tr>
+                  <td></td>
+                  <td>{{fs.name}}</td>
+                  <td>{{ tools.numrange(None, None, fs.amount) }}</td>
+                </tr>
+              {% endif %}
+            {% endfor %}
+            <tr>
+              <td colspan="2">Total Budget</td>
+              <td>{{ tools.numrange(None, None, fd.totalBudget) }}</td>
+            </tr>
+          </table>
+          {% endfor %}
+        {% endif %}
+        
+        {% if entity.goals %}
+          <h3>Goals</h3>
+          <p>{{ entity.goals | pseudotext }}</p>
+        {% endif %}
+        {% if entity.networking %}
+          <h3>Networking</h3>
+          <p>{{ entity.networking | pseudotext }}</p>
+        {% endif %}
       {% endif %}
     </div>
   </div>

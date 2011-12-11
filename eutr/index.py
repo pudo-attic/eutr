@@ -2,6 +2,14 @@ from pprint import pprint
 from eutr import model
 from eutr.core import solr
 
+from datetime import datetime
+from dateutil import tz
+
+def datetime_add_tz(dt):
+    """ Solr requires time zone information on all dates. """
+    return datetime(dt.year, dt.month, dt.day, dt.hour,
+                    dt.minute, dt.second, tzinfo=tz.tzutc())
+
 def flatten(data, sep='.'):
     _data = {}
     for k, v in data.items():
@@ -37,7 +45,10 @@ def index():
         #pprint(data)
         for k, v in data.items():
             #data[k + '.n'] = v
-            data[k + '.s'] = v
+            if isinstance(v, datetime):
+                data[k] = datetime_add_tz(v)
+            else:
+                data[k + '.s'] = v
         data['id'] = org.id
         buf.append(data)
         if i and i % 1000 == 0:

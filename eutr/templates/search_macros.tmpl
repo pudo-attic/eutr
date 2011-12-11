@@ -38,3 +38,19 @@ v }}</span></a>
     </ul>
   </div>
 {% endmacro %}
+
+{% macro facetlist(pager, name, field, cut=6) %}
+  <h3>{{name}}</h3>
+  <ul class="facets" id="{{name}}">
+    {%for name, count in pager.facet_values(field) %}
+      <li class="{{ 'cut' if loop.index > cut else '' }}">
+        <a href="{{pager.filter_url(field, name)}}">{{name}}</a> 
+        <span class="help-inline">({{count}})</span>
+      </li>
+    {%endfor%}
+    {% if pager.facet_values(field).count > cut %}
+      <li class="expandFacet"><a><em>More...</em></a></li>
+      <li class="cut collapseFacet"><a><em>Fewer...</em></a></li>
+    {% endif %}
+  </ul>
+{% endmacro %}

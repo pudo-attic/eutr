@@ -1,4 +1,5 @@
 {% import "search_macros.tmpl" as macros %}
+{% import "tools.tmpl" as tools %}
 {% extends "layout.tmpl" %}
 
 {% block title %}
@@ -14,43 +15,12 @@
   </div>
   <div class="row">
     <div class="span-one-third">
-      <h3>Interests</h3>
-      <ul>
-      {%for name, count in pager.facet_values('interests') %}
-        <li><a href="{{pager.filter_url('interests', name)}}">{{name}}</a> <span class="help-inline">({{count}})</span></li>
-      {%endfor%}
-      </ul>
-      <h3>Category</h3>
-      <ul>
-      {%for name, count in pager.facet_values('subCategory') %}
-        <li><a href="{{pager.filter_url('subCategory', name)}}">{{name}}</a> <span class="help-inline">({{count}})</span></li>
-      {%endfor%}
-      </ul>
-      <h3>Country</h3>
-      <ul>
-      {%for name, count in pager.facet_values('contactCountry') %}
-        <li><a href="{{pager.filter_url('contactCountry', name)}}">{{name}}</a> <span class="help-inline">({{count}})</span></li>
-      {%endfor%}
-      </ul>
+      {{ macros.facetlist(pager, 'Interests', 'interests') }}
+      {{ macros.facetlist(pager, 'Category', 'subCategory') }}
+      {{ macros.facetlist(pager, 'Country', 'contactCountry') }}
     </div>
     <div class="span-two-thirds">
-      
-      <table class="condensed-table zebra-striped">
-        {% for result in pager %}
-          <tr>
-            <td><a href="{{ url_for('entity', id=result['id'])}}">
-            {{ result.get('name') }}</a></td>
-            <td><span class="help-inline">
-              {% if result['type'] == 'representative' %}
-                Representative
-              {% else %}
-                Organisation
-              {% endif %}
-            </span></td>
-          </tr>
-        {% endfor %}
-      </table>
-      <br/>
+      {{ tools.orglist(pager) }}    
       {{ macros.pager(pager) }}
     </div>
   </div>

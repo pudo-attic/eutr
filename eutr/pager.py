@@ -15,7 +15,7 @@ class Pager(object):
         try:
             self.page = int(args.get('p'))
         except: pass
-        self.limit = 30
+        self.limit = 20
         self.facets = facets
         self._results = None
 
@@ -104,9 +104,11 @@ class Pager(object):
         facets = self.results.get('facet_counts').get('facet_fields')
         _facets = []
         values = facets.get(key + '.s')
+        filters = [f for k, f in self.filters]
         for value in values[::2]:
             count = values[values.index(value)+1]
-            _facets.append((value, count))
+            if value not in filters:
+                _facets.append((value, count))
         return sorted(_facets, key=lambda (a, b): b, reverse=True)
 
     def query(self, **kwargs):
@@ -115,7 +117,7 @@ class Pager(object):
             fq=self.fq,
             facet='true',
             facet_field=[f + '.s' for f in self.facets],
-            facet_limit=20,
+            facet_limit=100,
             rows=self.limit,
             start=self.offset)
         return json.loads(data)

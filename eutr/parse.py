@@ -1,3 +1,4 @@
+from datetime import datetime
 from lxml import etree
 from pprint import pprint
 
@@ -9,6 +10,9 @@ _SI="http://www.w3.org/2001/XMLSchema-instance"
 NS = '{%s}' % _NS
 NS2 = '{%s}' % _NS2
 SI = '{%s}' % _SI
+
+def dateconv(ds):
+    return datetime.strptime(ds, "%Y-%m-%dT%H:%M:%S.%f+01:00")
 
 def parse(file_name, handle_func):
     data = []
@@ -100,6 +104,8 @@ def parse(file_name, handle_func):
         fi = fd_el.find(NS + 'financialInformation')
         rep['fdType'] = fi.get(SI + 'type')
         #import ipdb; ipdb.set_trace()
+        rep['fdTotalBudget'] = fi.findtext('.//' + NS +
+            'totalBudget')
         rep['fdPublicFinancingTotal'] = fi.findtext('.//' + NS +
             'totalPublicFinancing')
         rep['fdPublicFinancingNational'] = fi.findtext('.//' + NS +
@@ -187,8 +193,8 @@ def load(rep):
     r = model.Representative()
     r.identificationCode = rep['identificationCode']
     r.status = rep['status']
-    r.registrationDate = rep['registrationDate']
-    r.lastUpdateDate = rep['lastUpdateDate']
+    r.registrationDate = dateconv(rep['registrationDate'])
+    r.lastUpdateDate = dateconv(rep['lastUpdateDate'])
     r.legalStatus = rep['legalStatus']
     r.acronym = rep['acronym']
     r.originalName = rep['originalName']
@@ -232,10 +238,11 @@ def load(rep):
     fd = model.FinancialData()
     fd.representative = r
     fd.type = rep['fdType']
-    fd.startDate = rep['fdStartDate']
-    fd.endDate = rep['fdEndDate']
+    fd.startDate = dateconv(rep['fdStartDate'])
+    fd.endDate = dateconv(rep['fdEndDate'])
     fd.eurSourcesProcurement = rep['fdEurSourcesProcurement']
     fd.eurSourcesGrants = rep['fdEurSourcesGrants']
+    fd.totalBudget = rep['fdTotalBudget']
     fd.publicFinancingTotal = rep['fdPublicFinancingTotal']
     fd.publicFinancingNational = rep['fdPublicFinancingNational']
     fd.publicFinancingInfranational = rep['fdPublicFinancingInfranational']

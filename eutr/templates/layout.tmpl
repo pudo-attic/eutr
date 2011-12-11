@@ -48,6 +48,15 @@
   <script src="/static/js/script.js"></script>
   <script>
     $(document).ready(function() {
+      $(".expandFacet a").click(function(e) {
+        $(e.target).parents(".facets").children(".cut").show();
+        $(e.target).parents("li").hide();
+      });
+      $(".collapseFacet a").click(function(e) {
+        var facets = $(e.target).parents(".facets");
+        $(facets).children(".cut").hide();
+        $(facets).children(".expandFacet").show();
+      });
       {% block script %} {% endblock %}
     });
   </script>
