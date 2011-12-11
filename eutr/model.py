@@ -38,24 +38,17 @@ class Organisation(db.Model, HaveMixin, AsDictMixin):
     id = db.Column(db.Integer, primary_key=True)
     type = db.Column('type', db.String(50))
     __mapper_args__ = {'polymorphic_on': type}
+    __mapper_args__ = {'polymorphic_identity': 'organisation'}
 
     name = db.Column(db.Unicode)
     members = db.Column(db.Float)
+    
+    turnoversFor = db.relationship('Turnover',
+        primaryjoin='Turnover.customer_id==Organisation.id',
+        backref='customer', lazy='dynamic')
 
     def as_dict_child(self):
         return {'id': self.id, 'name': self.name}
-
-
-class Member(Organisation):
-    __mapper_args__ = {'polymorphic_identity': 'member'}
-
-
-class Customer(Organisation):
-    __mapper_args__ = {'polymorphic_identity': 'customer'}
-
-    turnoversFor = db.relationship('Turnover',
-        primaryjoin='Turnover.customer_id==Customer.id',
-        backref='customer', lazy='dynamic')
 
 memberships = db.Table('memberships',
     db.Column('member_id', db.Integer, db.ForeignKey('organisation.id')),
@@ -213,9 +206,9 @@ class Representative(Organisation):
     countryOfMembers = db.relationship(Country, secondary=countries_of_members,
         backref=db.backref('representativesMembers', lazy='dynamic'))
     
-    memberships = db.relationship(Member, secondary=memberships,
+    memberships = db.relationship(Organisation, secondary=memberships,
         primaryjoin='Representative.id==memberships.c.representative_id',
-        secondaryjoin='Member.id==memberships.c.member_id',
+        secondaryjoin='Organisation.id==memberships.c.member_id',
         backref=db.backref('representedBy', lazy='dynamic'))
     
     financialData = db.relationship('FinancialData', uselist=False,

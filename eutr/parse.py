@@ -226,7 +226,7 @@ def load(rep):
     r.interests = map(model.Interest.have, rep['interests'])
     r.actionFields = map(model.ActionField.have, rep['actionFields'])
     r.countryOfMembers = map(model.Country.have, rep['countryOfMembers'])
-    r.memberships = [model.Member.have(o['name'], \
+    r.memberships = [model.Organisation.have(o['name'], \
         members=o['numberOfMembers']) for o in rep['organisations']]
     
     fd = model.FinancialData()
@@ -271,7 +271,7 @@ def load(rep):
         t = model.Turnover()
         t.financialData = fd
         t.representative = r
-        t.customer = model.Customer.have(bd['name'])
+        t.customer = model.Organisation.have(bd['name'])
         t.min = bd['min']
         t.max = bd['max']
         model.db.session.add(t)

@@ -1,5 +1,6 @@
 import math
 import json
+from urllib import urlencode
 from flask import url_for, g
 
 from eutr.core import solr
@@ -55,20 +56,29 @@ class Pager(object):
     @property
     def filters(self):
         filters = []
+        for k, v in self.params:
+            if k.startswith(FILTER_PREFIX):
+                filters.append((k, v))
         return filters
+
+    @property
+    def fq(self):
+        _fq = []
+        for k, v in self.filters:
+            _fq.append('%s:"%s"' % (k[len(FILTER_PREFIX):], v))
+        return _fq
 
     def filter_url(self, key, value):
         params = self.params
-        tp = (key, value.encode('utf-8'))
+        tp = (FILTER_PREFIX + key, value.encode('utf-8'))
         if tp not in params:
             params.append(tp)
-        return url_for('search', **dict(params))
-
+        return url_for('search') + '?' + urlencode(params)
 
     def unfilter_url(self, key, value):
-        p = (key, value.encode('utf-8'))
+        p = (FILTER_PREFIX + key, value.encode('utf-8'))
         params = [e for e in self.params if e != p]
-        return url_for('search', **dict(params))
+        return url_for('search') + '?' + urlencode(params)
 
     @property
     def q(self): 
@@ -98,7 +108,7 @@ class Pager(object):
     def query(self, **kwargs):
         data = solr().raw_query(q=self.q or '*:*',
             wt='json', sort='score desc, name desc',
-            fq=self.filters,
+            fq=self.fq,
             facet='true',
             facet_field=[f + '.s' for f in self.facets],
             facet_limit=50,

@@ -1,0 +1,44 @@
+{% extends "layout.tmpl" %}
+
+{% block title %}
+  {{ organisation['name'] }}
+{% endblock %}
+
+{% block content %}
+  <h2>{{ organisation['name'] }}</h2>
+  <div class="row">
+    <div class="span-one-third">
+      &nbsp;
+    </div>
+    <div class="span-two-thirds">
+      {% if organisation.type != 'representative' %}
+        {% if organisation.representedBy %}
+          <h3>Group Memberships</h3>
+          <ul>
+            {% for rep in organisation.representedBy %}
+              <li><a href="{{ url_for('organisation', id=rep.id) }}">{{
+rep.name }}</a></li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+
+        {% if organisation.turnoversFor %}
+          <h3>Paid Representation</h3>
+          <ul>
+            {% for turn in organisation.turnoversFor %}
+              <li><a href="{{ url_for('organisation', id=turn.representative.id) }}">{{
+turn.representative.name }}</a>: EUR {{ turn.min }} - {{ turn.max }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endif %}
+
+
+      <pre>{{ raw }}</pre>
+    </div>
+  </div>
+{% endblock %}
+
+
+
+

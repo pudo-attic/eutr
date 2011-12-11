@@ -1,0 +1,35 @@
+{% import "search_macros.tmpl" as macros %}
+{% extends "layout.tmpl" %}
+
+{% block title %}
+  Welcome
+{% endblock %}
+
+{% block content %}
+  <h1>EU TR: {{ pager.q }}</h1>
+  <div class="row">
+    <div class="span-one-third">
+      <ul>
+      {%for name, count in pager.facet_values('interests') %}
+        <li><a href="{{pager.filter_url('interests', name)}}">{{name}}</a> <span class="help-inline">({{count}})</span></li>
+      {%endfor%}
+      </ul>
+    </div>
+    <div class="span-two-thirds">
+      {{ macros.search(pager) }}
+      
+      <ul>
+        {% for result in pager %}
+          <li><a href="{{ url_for('organisation', id=result['id'])}}">
+            {{ result.get('name') }}</a></li>
+        {% endfor %}
+      </ul>
+      <br/>
+      {{ macros.pager(pager) }}
+    </div>
+  </div>
+{% endblock %}
+
+
+
+

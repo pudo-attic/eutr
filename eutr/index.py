@@ -34,8 +34,9 @@ def index():
     buf = []
     for i, org in enumerate(model.db.session.query(model.Organisation)):
         data = flatten(org.as_dict())
+        #pprint(data)
         for k, v in data.items():
-            data[k + '.n'] = v
+            #data[k + '.n'] = v
             data[k + '.s'] = v
         data['id'] = org.id
         buf.append(data)
