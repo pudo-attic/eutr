@@ -4,6 +4,7 @@ class HaveMixin(object):
 
     @classmethod
     def have(cls, name, **kw):
+        db.session.flush()
         e = db.session.query(cls).filter_by(name=name).first()
         if e is None:
             e = cls()
@@ -165,7 +166,7 @@ class FinancialData(db.Model, AsDictMixin):
 class Representative(Organisation):
     __mapper_args__ = {'polymorphic_identity': 'representative'}
     
-    identificationCode = db.Column(db.Unicode, unique=True)
+    identificationCode = db.Column(db.Unicode) #, unique=True)
     status = db.Column(db.Unicode)
     registrationDate = db.Column(db.DateTime)
     lastUpdateDate = db.Column(db.DateTime)
