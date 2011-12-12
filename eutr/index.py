@@ -51,13 +51,14 @@ def index():
                 data[k + '.s'] = v
         data['id'] = org.id
         buf.append(data)
-        if i and i % 1000 == 0:
+        if i and i % 50 == 0:
             print "%s ... " % i
             solr_.add_many(buf)
             solr_.commit()
             buf = []
     solr_.add_many(buf)
     solr_.commit()
+    solr_.optimize()
 
 
 if __name__ == '__main__':
