@@ -4,6 +4,7 @@ from pprint import pprint
 
 import model
 
+SRC = 'http://ec.europa.eu/transparencyregister/public/consultation/statistics.do?action=getLobbyistsXml&fileType=NEW'
 _NS2="http://www.w3.org/1999/xlink"
 _NS="http://intragate.ec.europa.eu/transparencyregister/intws/20090623_new"
 _SI="http://www.w3.org/2001/XMLSchema-instance"
@@ -234,6 +235,7 @@ def load(rep):
     r.countryOfMembers = map(model.Country.have, rep['countryOfMembers'])
     r.memberships = [model.Organisation.have(o['name'], \
         members=o['numberOfMembers']) for o in rep['organisations']]
+    model.db.session.add(r)
     
     fd = model.FinancialData()
     fd.representative = r
@@ -282,14 +284,20 @@ def load(rep):
         t.min = bd['min']
         t.max = bd['max']
         model.db.session.add(t)
-
-    model.db.session.add(r)
+    
+    print r.id
     model.db.session.add(fd)
     model.db.session.commit()
 
 if __name__ == '__main__':
-    file_name = 'full_export_new.xml'
+    #file_name = '../full_export_new.xml'
+    file_name = SRC
+    model.db.drop_all()
     model.db.create_all()
     data = parse(file_name, load)
+    #data = parse(file_name, lambda x: x)
+    #print len(data)
+    #print len([d['identificationCode'] for d in data])
+    #model.db.session.commit()
 
 
